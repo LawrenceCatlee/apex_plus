@@ -39,6 +39,9 @@ python main.py --model llama3-70b --num-gpus-per-node 2 --trace-file ./traces/ll
 
 # Simulate with a MoE Model
 python main.py --model mixtral-8x7b-local --num-gpus-per-node 4 --num-experts 8 --trace-file ./traces/mistral/lmsys_05.jsonl
+
+# Simulate with PD-disaggregation; Prefill cluster = 4 H100, Decoder cluster = 4 H200
+python splitwise.py --model llama3-70b --num-p-gpus-per-node 4 --p-gpu H100-SXM-80GB --num-d-gpus-per-node 4 --d-gpu H200-SXM-141GB --trace-file ./traces/llama/creation_05.jsonl
 ```
 > Note: APEX+ supports simulation on real request traces. The traces should be stored in `.jsonl` format, and include the following items: StartTimeOffset (offset from the first request, ns), ContextTokens (input sequence length), and GeneratedTokens (output sequence length).  
 > Note 2: For a full list of supported LLMs, please see ``main.py``.

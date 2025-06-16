@@ -134,7 +134,7 @@ class Simulator:
 
             return percentile_vals
 
-        def calculate_slo_metrics(latency_dict, slo_targets):
+        def calculate_slo_metrics(latency_dict, slo_targets, arch):
             token_latencies_per_request = [latency for latency in latency_dict.values()]
             num_requests = len(token_latencies_per_request)
             ttft_target = slo_targets[0]
@@ -150,14 +150,15 @@ class Simulator:
             slo_metrics.append( (ttft_slo_counter/num_requests) * 100 )
 
             # Calculate Percentage of requests that have an avg TPOT <= TPOT_SLO
-            tpot_slo_counter = 0
-            tok_latencies_per_req_after_first_tok = [sublist[1:] for sublist in token_latencies_per_request]
-            for latency_list in token_gen_times:
-                # Calculate Avg TPOT per request
-                avg_tpot = np.mean(latency_list)/US_TO_MS
-                if(avg_tpot <= tpot_target):
-                    tpot_slo_counter  += 1
-            slo_metrics.append( (tpot_slo_counter/num_requests) * 100 )
+            if arch == "decode" or arch == "decoder":
+                tpot_slo_counter = 0
+                tok_latencies_per_req_after_first_tok = [sublist[1:] for sublist in token_latencies_per_request]
+                for latency_list in token_gen_times:
+                    # Calculate Avg TPOT per request
+                    avg_tpot = np.mean(latency_list)/US_TO_MS
+                    if(avg_tpot <= tpot_target):
+                        tpot_slo_counter  += 1
+                slo_metrics.append( (tpot_slo_counter/num_requests) * 100 )
 
             return slo_metrics
         
@@ -209,7 +210,7 @@ class Simulator:
         avg_ttft = 0.0
         mbu = 0.0
         # If encoder, there the output_len is 0
-        if arch == "encoder":
+        if arch == "encoder" or arch == "prefill":
             avg_output_len = 0.0
         # Decoders that generate tokens
         else:
@@ -300,7 +301,7 @@ class Simulator:
         performance_metrics_units.append("%")
 
         # Get SLO Metrics
-        slo_metrics = calculate_slo_metrics(request_token_gen_times, slo_targets)
+        slo_metrics = calculate_slo_metrics(request_token_gen_times, slo_targets, arch)
 
         return performance_metrics, performance_metrics_units, slo_metrics
 
@@ -342,7 +343,7 @@ class Simulator:
         # This limits the maximum number of sequences that can be batched.
         kv_token_sizes = (
             [1] * num_devices
-            if arch == "encoder"
+            if arch == "encoder" or arch == "prefill"
             else stage_schedule.get_kv_token_size_per_device(self.dtype["kv"])
         )
 
@@ -533,7 +534,10 @@ class Simulator:
 
         num_cached_tokens = 0
         req_counter = 0
-        num_generated_tokens: Dict[int, int] = {}  # request_id -> num_tokens
+        if arch == "decode": # skipping the prefill stage for decode clusters
+            num_generated_tokens: Dict[int, int] = defaultdict(lambda: 1)  
+        else: # if arch == "encoder" or "decoder" (no P/D dissagregation) or "prefill"
+            num_generated_tokens: Dict[int, int] = {}  # request_id -> num_tokens
         running: List[int] = []  # request_ids
         stopped: List[int] = []  # request_ids
 
@@ -704,7 +708,7 @@ class Simulator:
                 new_running: List[int] = []
                 for request_id in running:
                     num_generated = num_generated_tokens[request_id]
-                    if arch == "encoder":
+                    if arch == "encoder" or arch=="prefill":
                         output_len = 0
                     else:
                         output_len = requests[request_id].output_len
