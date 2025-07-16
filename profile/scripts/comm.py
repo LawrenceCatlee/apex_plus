@@ -466,7 +466,7 @@ if __name__ == "__main__":
         "--efa", action="store_true", help="Use AWS EFS on p3.24 or p4.24 instances"
     )
     parser.add_argument(
-        "--ib", action="store_true", help="Use InfiniBand for NCCL communcation"
+        "--ib", action="store_true", help="Use InfiniBand for NCCL communication"
     )
     parser.add_argument(
         "--debug", action="store_true", help="Print nccl debug information"
