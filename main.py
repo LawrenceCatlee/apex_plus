@@ -61,6 +61,7 @@ def main(args: argparse.Namespace):
 
     if model.num_encoder_blocks == 0 and model.num_decoder_blocks == 0:
         raise RuntimeError("Number of encoders and decoders cannot both be zero.")
+    
     if model.num_encoder_blocks > 0:
         engine = SearchEngine(
             model, encoder_cluster, trace, "encoder", dtype
@@ -76,6 +77,7 @@ def main(args: argparse.Namespace):
             args.max_batch_size,
         )  # updated traces by adding encode time
         trace = Trace(trace)
+
     if model.num_decoder_blocks > 0:
         engine = SearchEngine(
             model, cluster, trace, "decoder", dtype
@@ -95,8 +97,12 @@ def main(args: argparse.Namespace):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--model", type=str, required=True, help="Model name in HuggingFace model Hub"
+        "--model", 
+        type=str, 
+        required=True, 
+        help="Model name in HuggingFace model Hub"
     )
+
     # MoE config
     parser.add_argument(
         "--num-experts",
@@ -105,7 +111,10 @@ if __name__ == "__main__":
         help="Number of MLP experts of the model. Default is none for models not regarded as MOE model.",
     )
     parser.add_argument(
-        "--topk", type=int, default=2, help="Topk hyperparameter for MOE models."
+        "--topk", 
+        type=int, 
+        default=2, 
+        help="Topk hyperparameter for MOE models."
     )
     parser.add_argument(
         "--capacity-factor",
@@ -113,15 +122,19 @@ if __name__ == "__main__":
         default=1.0,
         help="Capacity factor for MoE models",
     )
+
     # Cluster config
     parser.add_argument(
-        "--num-nodes", type=int, default=1, help="Number of nodes in the cluster."
+        "--num-nodes", 
+        type=int, 
+        default=1, 
+        help="Number of nodes in the cluster."
     )
     parser.add_argument(
         "--num-gpus-per-node",
         type=int,
         required=True,
-        help=" Number of GPUs per node in the cluster",
+        help="Number of GPUs per node in the cluster",
     )
     parser.add_argument(
         "--gpu",
@@ -129,29 +142,54 @@ if __name__ == "__main__":
         choices=["V100-PCIE-16GB", "H100-SXM-80GB","H200-SXM-141GB",],
         default="H100-SXM-80GB",
     )
-    parser.add_argument("--frequency", type=int, choices=[0, 810, 1980], default=0)
+    parser.add_argument(
+        "--frequency", 
+        type=int, 
+        choices=[0, 810, 1980], 
+        default=0
+    )
+
     # Workload config
-    parser.add_argument("--trace-file", type=str)
-    parser.add_argument("--prompt-len", type=int, default=2048)
-    parser.add_argument("--output-len", type=int, default=128)
+    parser.add_argument(
+        "--trace-file", 
+        type=str
+    )
+    parser.add_argument(
+        "--prompt-len", 
+        type=int, 
+        default=2048
+    )
+    parser.add_argument(
+        "--output-len", 
+        type=int, 
+        default=128
+    )
     parser.add_argument(
         "--num-requests",
         type=int,
         default=1024,
         help="Number of requests to feed into the APEX. Large number of requests increase simulation accuracy but also increases latency of simulation execution.",
     )
+
     # Misc
     parser.add_argument(
         "--disable-ray",
         action="store_true",
-        help="Disable Ray and serialize the execution of " "simulation.",
+        help="Disable Ray and serialize the execution of simulation.",
     )
+
     # Quantization
     parser.add_argument(
-        "--kv-dtype", type=str, choices=["float", "half", "float8"], default="half"
+        "--kv-dtype", 
+        type=str, 
+        choices=["float", "half", "float8"], 
+        default="half"
     )
     parser.add_argument(
-        "--weight-dtype", type=str, choices=["float", "half", "float8"], default="half"
+        "--weight-dtype", 
+        type=str, 
+        choices=["float", "half", "float8"], 
+        default="half"
     )
     parser.add_argument(
         "--activation-dtype",
@@ -167,6 +205,7 @@ if __name__ == "__main__":
         default=False,
         help="Output all possible execution plans. Defaults to False",
     )
+
     # Log Additional Percentiles
     parser.add_argument(
         "--request-percentiles",
@@ -194,6 +233,7 @@ if __name__ == "__main__":
         default=10,
         help="Define SLO Latency for TPOT in ms. Default is 10 ms"
     )
+    
     # Define max batch size
     parser.add_argument(
         "--max-batch-size", 
