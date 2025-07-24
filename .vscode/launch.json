@@ -1,0 +1,78 @@
+// .vscode/launch.json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: main.py (带参数)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [
+                "--model", "llama3-70b",
+                "--num-gpus-per-node", "2",
+                "--prompt-len", "128",
+                "--output-len", "2048",
+                "--all"
+            ]
+        },
+        {
+            "name": "Python: main.py (简单测试)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [
+                "--model", "mixtral-8x7b-local",
+                "--num-gpus-per-node", "4",
+                "--num-experts", "8",
+                "--trace-file", "./traces/mistral/lmsys_05.jsonl"
+            ]
+        },
+        {
+            "name": "Python: test_args.py (参数测试)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/test_args.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [
+                "--model", "llama3-70b",
+                "--num-gpus-per-node", "2",
+                "--prompt-len", "128",
+                "--output-len", "2048",
+                "--all"
+            ]
+        },
+        {
+            "name": "Python: comm.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/profile/scripts/comm.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [
+                "--efa", "True",
+            ]
+        }
+    ]
+}
+  
